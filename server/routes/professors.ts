@@ -26,7 +26,7 @@ router.get("/professors", async (_req, res) => {
 // Adicionar novo professor
 router.post("/professors", async (req, res) => {
   try {
-    const { name, initials, active } = req.body;
+    const { name, initials, active = 1 } = req.body;
 
     // Validação básica
     if (!name || !initials) {
@@ -42,7 +42,7 @@ router.post("/professors", async (req, res) => {
         { 
           name, 
           initials: initials.toUpperCase(),
-          active: active ?? true
+          active
         }
       ])
       .select()
