@@ -2,14 +2,6 @@
   "version": 2,
   "builds": [
     {
-      "src": "package.json",
-      "use": "@vercel/static-build",
-      "config": {
-        "buildCommand": "npm install && npm run build",
-        "outputDirectory": "dist"
-      }
-    },
-    {
       "src": "server/index.ts",
       "use": "@vercel/node"
     }
@@ -17,20 +9,11 @@
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/server/index.ts"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/dist/$1",
-      "continue": true
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/dist/index.html"
+      "dest": "server/index.ts"
     }
   ],
   "env": {
     "SUPABASE_URL": "https://rqqgohsjogdkesxtlvbn.supabase.co",
-    "SUPABASE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxcWdvaHNqb2dka2VzeHRsdmJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4ODE0OTQsImV4cCI6MjA1OTQ1NzQ5NH0.eZcVPP6GUMeBSBJTvWgbroCtVfBx_lCn_3DEZukLtxw"
+    "SUPABASE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxcWdvaHNqb2dka2VzeHRsdmJuIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0Mzg4MTQ5NCwiZXhwIjoyMDU5NDU3NDk0fQ.CH3R1gRAZzI3lZULLJdzyDtt9f7xJTgZ6lAjEQ1khl8"
   }
 }
