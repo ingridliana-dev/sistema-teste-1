@@ -59,9 +59,10 @@ export function ProfessorSemanal() {
   const sharedProfToken = searchParams.get('token');
   
   // Buscar dados dos profissionais
-  const { data: professionals, isLoading: professionalsLoading } = useQuery({
+  const { data: professionals = [], isLoading: professionalsLoading } = useQuery<{ data: Professional[] }, Error, Professional[]>({
     queryKey: ['/api/professionals'],
-    staleTime: 30000
+    staleTime: 30000,
+    select: (response) => response.data
   });
   
   // Verificar se estamos em uma visualização compartilhada
@@ -187,7 +188,7 @@ export function ProfessorSemanal() {
                             </div>
                           ) : (
                             <ProfessionalSelector 
-                              professionals={professionals || []}
+                              professionals={professionals}
                               onSelect={handleSelectProfessional}
                               selectedProfessional={selectedProfessional}
                             />
