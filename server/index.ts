@@ -1,86 +1,51 @@
-import express, { type Request, Response, NextFunction } from "express";
-import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
-import { initializeNeonDb } from "./neondb";
-
-log("Usando banco de dados Neon PostgreSQL");
-// Inicializa o banco de dados Neon
-initializeNeonDb()
-  .then(success => {
-    if (success) {
-      log("Inicialização do banco de dados Neon concluída com sucesso!");
-    } else {
-      log("Falha na inicialização do banco de dados Neon, verificando logs para detalhes.");
-    }
-  })
-  .catch(err => {
-    log(`Erro crítico na inicialização do banco de dados Neon: ${err}`);
-    log("Verificar se a conexão STRING está correta e a estrutura da base de dados Neon está configurada.");
-  });
+import express from "express";
+import cors from "cors";
+import { professorsRouter } from "./routes/professors";
+import { checkDatabaseConnection } from "./db";
 
 const app = express();
+const port = process.env.PORT || 3001;
+
+// Middleware para processar JSON
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 
-app.use((req, res, next) => {
-  const start = Date.now();
-  const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
+// Configuração do CORS
+app.use(cors({
+  origin: process.env.NODE_ENV === 'production' 
+    ? ['https://sistema-teste-1.vercel.app'] 
+    : ['http://localhost:3000'],
+  credentials: true
+}));
 
-  const originalResJson = res.json;
-  res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-    return originalResJson.apply(res, [bodyJson, ...args]);
-  };
+// Rotas da API
+app.use("/api", professorsRouter);
 
-  res.on("finish", () => {
-    const duration = Date.now() - start;
-    if (path.startsWith("/api")) {
-      let logLine = `${req.method} ${path} ${res.statusCode} in ${duration}ms`;
-      if (capturedJsonResponse) {
-        logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
-      }
-
-      if (logLine.length > 80) {
-        logLine = logLine.slice(0, 79) + "…";
-      }
-
-      log(logLine);
+// Rota de healthcheck
+app.get("/api/health", async (_req, res) => {
+  try {
+    const isDbConnected = await checkDatabaseConnection();
+    
+    if (!isDbConnected) {
+      res.status(500).json({ 
+        status: "error",
+        message: "Database connection failed" 
+      });
+      return;
     }
-  });
 
-  next();
+    res.json({ 
+      status: "healthy",
+      database: "connected"
+    });
+  } catch (error) {
+    console.error("Health check error:", error);
+    res.status(500).json({ 
+      status: "error",
+      message: error instanceof Error ? error.message : "Unknown error"
+    });
+  }
 });
 
-(async () => {
-  const server = await registerRoutes(app);
-
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
-    const status = err.status || err.statusCode || 500;
-    const message = err.message || "Internal Server Error";
-
-    res.status(status).json({ message });
-    throw err;
-  });
-
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
-    serveStatic(app);
-  }
-
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
-    log(`serving on port ${port}`);
-  });
-})();
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
+});

@@ -631,21 +631,55 @@ export class PostgresStorage implements IStorage {
   }
 }
 
-// Importa o storage do Neon PostgreSQL
-import { NeonStorage } from './neonStorage';
+import { supabase } from './supabase';
 
-// Cria e exporta a instância de armazenamento
-let storage: IStorage;
-
-// Usa o Neon PostgreSQL
-if (process.env.DATABASE_URL) {
-  console.log("Usando armazenamento Neon PostgreSQL");
-  storage = new NeonStorage();
-} 
-// Caso não tenha Neon configurado, usa o storage em memória
-else {
-  console.log("Usando armazenamento em memória (fallback)");
-  storage = new MemStorage();
+export interface Storage {
+  get(key: string): Promise<string | null>;
+  set(key: string, value: string): Promise<void>;
+  delete(key: string): Promise<void>;
 }
 
-export { storage };
+// Implementação do Storage usando o Supabase
+export class SupabaseStorage implements Storage {
+  async get(key: string): Promise<string | null> {
+    const { data, error } = await supabase
+      .from('storage')
+      .select('value')
+      .eq('key', key)
+      .single();
+
+    if (error) {
+      console.error('Erro ao buscar valor:', error);
+      return null;
+    }
+
+    return data?.value || null;
+  }
+
+  async set(key: string, value: string): Promise<void> {
+    const { error } = await supabase
+      .from('storage')
+      .upsert({ key, value })
+      .select();
+
+    if (error) {
+      console.error('Erro ao salvar valor:', error);
+      throw error;
+    }
+  }
+
+  async delete(key: string): Promise<void> {
+    const { error } = await supabase
+      .from('storage')
+      .delete()
+      .eq('key', key);
+
+    if (error) {
+      console.error('Erro ao deletar valor:', error);
+      throw error;
+    }
+  }
+}
+
+// Exporta uma instância da implementação do Storage
+export const storage = new SupabaseStorage();

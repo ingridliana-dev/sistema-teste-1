@@ -2,8 +2,8 @@ import { createClient } from '@supabase/supabase-js';
 import { PostgrestError } from '@supabase/supabase-js';
 
 // Essas variáveis de ambiente precisarão ser configuradas na Vercel
-const supabaseUrl = process.env.SUPABASE_URL || '';
-const supabaseKey = process.env.SUPABASE_KEY || '';
+const supabaseUrl = process.env.SUPABASE_URL || 'https://rqqgohsjogdkesxtlvbn.supabase.co';
+const supabaseKey = process.env.SUPABASE_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxcWdvaHNqb2dka2VzeHRsdmJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4ODE0OTQsImV4cCI6MjA1OTQ1NzQ5NH0.eZcVPP6GUMeBSBJTvWgbroCtVfBx_lCn_3DEZukLtxw';
 
 // Verificação para garantir que as variáveis de ambiente estão configuradas
 if (!supabaseUrl || !supabaseKey) {
@@ -22,8 +22,10 @@ export const supabase = createClient(supabaseUrl, supabaseKey, {
 // Função para verificar a conexão com o Supabase
 export async function testSupabaseConnection() {
   try {
-    // Apenas verifica se pode conectar ao Supabase sem depender de tabelas
-    const { error } = await supabase.auth.getSession();
+    // Tenta buscar os professores para verificar a conexão
+    const { error } = await supabase
+      .from('professionals')
+      .select('count(*)', { count: 'exact', head: true });
     
     if (error) {
       console.error('Erro ao conectar com o Supabase:', error.message);

@@ -1,9 +1,14 @@
 {
   "version": 2,
   "buildCommand": "npm run build",
-  "outputDirectory": "dist",
+  "devCommand": "npm run dev",
   "installCommand": "npm install",
-  "framework": "vite",
+  "framework": null,
+  "outputDirectory": ".next",
+  "env": {
+    "SUPABASE_URL": "@supabase-url",
+    "SUPABASE_KEY": "@supabase-key"
+  },
   "rewrites": [
     {
       "source": "/api/(.*)",
