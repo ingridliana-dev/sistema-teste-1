@@ -1,22 +1,26 @@
 {
   "version": 2,
   "buildCommand": "npm run build",
-  "devCommand": "npm run dev",
+  "outputDirectory": "dist",
   "installCommand": "npm install",
-  "framework": null,
-  "outputDirectory": ".next",
-  "env": {
-    "SUPABASE_URL": "@supabase-url",
-    "SUPABASE_KEY": "@supabase-key"
-  },
-  "rewrites": [
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "destination": "/api/$1"
+      "src": "server/index.ts",
+      "use": "@vercel/node"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "server/index.ts"
     },
     {
-      "source": "/(.*)",
-      "destination": "/"
+      "src": "/(.*)",
+      "dest": "/"
     }
-  ]
+  ],
+  "env": {
+    "SUPABASE_URL": "https://rqqgohsjogdkesxtlvbn.supabase.co",
+    "SUPABASE_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJxcWdvaHNqb2dka2VzeHRsdmJuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4ODE0OTQsImV4cCI6MjA1OTQ1NzQ5NH0.eZcVPP6GUMeBSBJTvWgbroCtVfBx_lCn_3DEZukLtxw"
+  }
 }
