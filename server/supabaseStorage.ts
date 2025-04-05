@@ -23,19 +23,16 @@ export class SupabaseStorage implements IStorage {
       // Vamos apenas adicionar os dados padrão se as tabelas existirem
       try {
         // Verifica se já existem tipos de atividades
-        const { data: existingActivityTypes, error: activityError } = await supabase
+        const { data: existingActivityTypes, error: activityError, count } = await supabase
           .from('activity_types')
-          .select('count(*)', { count: 'exact', head: true });
+          .select('*', { count: 'exact', head: true });
         
         if (!activityError) {
           // Se não houver erro, a tabela existe
           console.log("Tabela activity_types existe no Supabase");
           
-          // Verifica quantos registros existem na tabela activity_types
-          const { count } = existingActivityTypes || { count: 0 };
-          
           // Se não houver registros, insere os tipos de atividade padrão
-          if (count === 0) {
+          if (!count || count === 0) {
             console.log("Inicializando tipos de atividades padrão no Supabase");
             await this.initDefaultActivityTypes();
           } else {
@@ -48,22 +45,19 @@ export class SupabaseStorage implements IStorage {
       
       try {
         // Verifica se já existem slots de tempo
-        const { data: existingTimeSlots, error: timeSlotsError } = await supabase
+        const { data: existingTimeSlots, error: timeSlotsError, count: timeSlotsCount } = await supabase
           .from('time_slots')
-          .select('count(*)', { count: 'exact', head: true });
+          .select('*', { count: 'exact', head: true });
         
         if (!timeSlotsError) {
           console.log("Tabela time_slots existe no Supabase");
           
-          // Verifica quantos registros existem na tabela time_slots
-          const { count } = existingTimeSlots || { count: 0 };
-          
           // Se não houver registros, insere os slots de tempo padrão
-          if (count === 0) {
+          if (!timeSlotsCount || timeSlotsCount === 0) {
             console.log("Inicializando slots de tempo padrão no Supabase");
             await this.initDefaultTimeSlots();
           } else {
-            console.log(`Tabela time_slots já contém ${count} registros`);
+            console.log(`Tabela time_slots já contém ${timeSlotsCount} registros`);
           }
         }
       } catch (err) {
@@ -72,22 +66,19 @@ export class SupabaseStorage implements IStorage {
       
       try {
         // Verifica se já existem profissionais
-        const { data: existingProfessionals, error: professionalsError } = await supabase
+        const { data: existingProfessionals, error: professionalsError, count: professionalsCount } = await supabase
           .from('professionals')
-          .select('count(*)', { count: 'exact', head: true });
+          .select('*', { count: 'exact', head: true });
         
         if (!professionalsError) {
           console.log("Tabela professionals existe no Supabase");
           
-          // Verifica quantos registros existem na tabela professionals
-          const { count } = existingProfessionals || { count: 0 };
-          
           // Se não houver registros, insere os profissionais padrão
-          if (count === 0) {
+          if (!professionalsCount || professionalsCount === 0) {
             console.log("Inicializando profissionais de exemplo no Supabase");
             await this.initDefaultProfessionals();
           } else {
-            console.log(`Tabela professionals já contém ${count} registros`);
+            console.log(`Tabela professionals já contém ${professionalsCount} registros`);
           }
         }
       } catch (err) {
